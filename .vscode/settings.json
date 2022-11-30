@@ -21,7 +21,14 @@
         "fstream": "cpp",
         "deque": "cpp",
         "list": "cpp",
-        "istream": "cpp"
+        "istream": "cpp",
+        "functional": "cpp",
+        "queue": "cpp",
+        "xhash": "cpp",
+        "xlocale": "cpp",
+        "xmemory": "cpp",
+        "iterator": "cpp",
+        "xutility": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled",
 }

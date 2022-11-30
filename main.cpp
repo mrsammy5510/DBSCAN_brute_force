@@ -4,10 +4,10 @@
 #include <fstream>
 #include <iomanip>   //for using setw() and setprecision()
 #include <stdio.h>
-
-#define TESTING
+#include <math.h>
+//#define TESTING
 //#define ISCLASS_ANS  //If the given dataset have CLASS answer
-#define DEBUG
+//#define DEBUG
 using namespace std;
 
 ifstream dataset;
@@ -45,12 +45,21 @@ int get_dim(string input_filename)
     return dim;
 }
 
+float dist(vector<float> point1, vector<float> point2)
+{
+    float sum = 0;
+    for(int i = 0;i<point1.size();i++)
+    {
+        sum+= pow(point1[i]-point2[i],2);
+    }
+    return sqrt(sum);
+}
+
 int main()
 {   
     vector<vector<float>> datapoints;
     vector<float> each_datapoint;
     vector<string> class_ans;
-    int start = 0;
     int i = 0,dim = 0;
     string input_filename  = "iris.data";
     string temp = "temp"; 
@@ -85,6 +94,21 @@ int main()
             each_datapoint.clear();
             
         }
+        int number_of_points = datapoints.size();       //The number is 3 if from 0~2
+        vector<vector<float>> distance_between_all_points;
+        vector<float> distance_for_a_point;
+        for(int row = 0;row<number_of_points;row++)
+        {
+            for(int col = 0;col<number_of_points;col++)
+            {
+                distance_for_a_point.push_back(dist(datapoints[row],datapoints[col]));
+            }
+            distance_between_all_points.push_back(distance_for_a_point);
+            distance_for_a_point.clear();
+        }
+        print_2d_vector(distance_between_all_points);
+        
+
         #ifdef DEBUG
             #ifdef ISCLASS_ANS
                 for(int k = 0;k<class_ans.size();k++)
@@ -100,6 +124,4 @@ int main()
 
 
     system("pause");
-    return 0;
-
 }
