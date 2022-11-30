@@ -5,12 +5,59 @@
 #include <iomanip>   //for using setw() and setprecision()
 #include <stdio.h>
 #include <math.h>
-//#define TESTING
+#define TESTING
 //#define ISCLASS_ANS  //If the given dataset have CLASS answer
 //#define DEBUG
+#define element float
 using namespace std;
 
 ifstream dataset;
+
+
+class queue_node
+{
+    public:
+        element data = 0;
+        queue_node* next = NULL;
+};
+queue_node* head = NULL;
+queue_node* tail = NULL;
+
+void enqueue(element data)
+{
+    if(head)
+    {
+        tail->next = new queue_node;
+        tail = tail->next;
+        tail->data = data;
+    }
+    else
+    {
+        head = new queue_node;
+        tail = head;
+        head->data = data;
+    }
+    return;
+}
+
+element dequeue(void)
+{
+    element data;
+    queue_node* temp;
+    if(head)
+    {
+        data = head->data;
+        temp = head;
+        head = head->next;
+        delete temp;
+        return data;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
 void print_2d_vector(vector<vector<float>> vector)
 {
     for(int i = 0;i<vector.size();i++)
@@ -55,8 +102,62 @@ float dist(vector<float> point1, vector<float> point2)
     return sqrt(sum);
 }
 
+bool all_visited(vector<bool> visited)
+{
+    for(int i = 0;i<visited.size();i++)
+    {
+        if(visited[i]==0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+void DBSCAN_bf(vector<vector<float>> distance, int* clustering_result, float dc, int epsilon)
+{
+    vector<bool> visited(distance[0].size(),false);
+    enqueue(0);
+    int point_now, neighbor = 0;
+    int c = 0;
+    while(!all_visited(visited))
+    {
+        point_now = dequeue();
+        if(point_now == -1)     //-1 means Queue empty
+        {
+            c++;
+            for(int i = 0;i<visited.size();i++)
+            {
+                if(visited[i]==false)
+                {
+                    point_now = i;
+                    break;
+                }
+            }
+            
+        }
+        if(visited[point_now]!=true)
+        {
+            for(int i=0;i<distance[0].size();i++)
+            {
+                if(distance[point_now][i]<dc)
+                {
+                    neighbor++;
+                    enqueue(i);
+                }
+            }
+            neighbor = 0;
+            clustering_result[point_now] = c;
+            visited[point_now] = true;
+        }
+        
+
+    }
+}
+
 int main()
 {   
+
     vector<vector<float>> datapoints;
     vector<float> each_datapoint;
     vector<string> class_ans;
@@ -97,6 +198,7 @@ int main()
         int number_of_points = datapoints.size();       //The number is 3 if from 0~2
         vector<vector<float>> distance_between_all_points;
         vector<float> distance_for_a_point;
+        int cluster_result[number_of_points] = {-1};    //-1 refers to noise
         for(int row = 0;row<number_of_points;row++)
         {
             for(int col = 0;col<number_of_points;col++)
@@ -107,7 +209,12 @@ int main()
             distance_for_a_point.clear();
         }
         print_2d_vector(distance_between_all_points);
-        
+        DBSCAN_bf(distance_between_all_points,cluster_result,0.6,3);
+
+        for(int i =0 ;i<number_of_points;i++)
+        {
+            cout<<"For point "<<i<<" is belong to cluster "<<cluster_result[i]<<endl;
+        }
 
         #ifdef DEBUG
             #ifdef ISCLASS_ANS
